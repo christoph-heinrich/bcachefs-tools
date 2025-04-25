@@ -236,11 +236,11 @@ __maybe_unused static const member_opt_set_fn	SET_BCH2_NO_MEMBER_OPT = NULL;
 		__builtin_types_compatible_p(typeof(_p), typeof(_type)), _p, NULL)
 
 const struct bch_option bch2_opt_table[] = {
-#define OPT_BOOL()		.type = BCH_OPT_BOOL, .min = 0, .max = 2
+#define OPT_BOOL()		.type = BCH_OPT_BOOL, .min = 0, .max = 1
 #define OPT_UINT(_min, _max)	.type = BCH_OPT_UINT,			\
 				.min = _min, .max = _max
 #define OPT_STR(_choices)	.type = BCH_OPT_STR,			\
-				.min = 0, .max = ARRAY_SIZE(_choices) - 1, \
+				.min = 0, .max = ARRAY_SIZE(_choices) - 2, \
 				.choices = _choices
 #define OPT_STR_NOLIMIT(_choices)	.type = BCH_OPT_STR,		\
 				.min = 0, .max = U64_MAX,		\
@@ -334,7 +334,7 @@ int bch2_opt_validate(const struct bch_option *opt, u64 v, struct printbuf *err)
 		return -BCH_ERR_ERANGE_option_too_small;
 	}
 
-	if (opt->max && v >= opt->max) {
+	if (opt->max && v > opt->max) {
 		if (err)
 			prt_printf(err, "%s: too big (max %llu)",
 			       opt->attr.name, opt->max);
@@ -474,7 +474,7 @@ void bch2_opt_to_text(struct printbuf *out,
 			prt_printf(out, "%lli", v);
 		break;
 	case BCH_OPT_STR:
-		if (v < opt->min || v >= opt->max)
+		if (v < opt->min || v > opt->max)
 			prt_printf(out, "(invalid option %lli)", v);
 		else if (flags & OPT_SHOW_FULL_LIST)
 			prt_string_option(out, opt->choices, v);
